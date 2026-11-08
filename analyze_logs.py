@@ -26,12 +26,16 @@ def main():
         recs = [json.loads(line) for line in f if line.strip()]
     for r in recs:
         events[r['event']] += 1
+        target = r.get('file') or r.get('label') or r.get('key_id') or (
+            f"key {r['action']}" if r.get('action') else '')
         for key in (r['event'], r.get('error_type')):
             if key in RULES:
-                findings.append((r['ts'], RULES[key], r.get('file') or r.get('label') or '', r.get('error', '')))
+                findings.append((r['ts'], RULES[key], target, r.get('error', '')))
                 break
-        if r['level'] == 'ERROR':
-            fails_by_target[r.get('file') or r.get('key_id') or r.get('label')] += 1
+        # тривога рахується для конкретного файлу або ключа; помилки без об'єкта не групуються
+        obj = r.get('file') or r.get('label') or r.get('key_id')
+        if r['level'] == 'ERROR' and obj:
+            fails_by_target[obj] += 1
 
     print(f'Records: {len(recs)}  period: {recs[0]["ts"]} .. {recs[-1]["ts"]}' if recs else 'No records')
     print('\nEvents:')

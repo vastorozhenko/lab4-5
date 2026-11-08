@@ -96,7 +96,7 @@ def cmd_key(args):
             log('warning', 'key_revoke', label=meta['label'], key_id=meta['key_id'])
             print('REVOKED', meta['label'], meta['key_id'])
     except KeyPolicyError as e:
-        log('error', 'key_error', action=args.action, error_type=type(e).__name__, error=str(e))
+        log('error', 'key_error', action=args.action, label=getattr(args, 'label', None), error_type=type(e).__name__, error=str(e))
         print(f'ERROR [{type(e).__name__}]: {e}')
         sys.exit(1)
 
