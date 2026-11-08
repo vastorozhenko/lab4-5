@@ -80,8 +80,12 @@ class RoundTrip(unittest.TestCase):
         for bits in (128, 192, 256):
             with self.subTest(bits=bits):
                 self.km.new_key(f'k{bits}', PWD, key_bits=bits)
-                _, k, _ = self.km.derive_keypair(f'k{bits}', PWD)
+                _, k, mk = self.km.derive_keypair(f'k{bits}', PWD)
                 self.assertEqual(len(k) * 8, bits)
+                for mode, m in MODES.items():
+                    m['encrypt'](self.src, self.p('e'), k, mk)
+                    m['decrypt'](self.p('e'), self.p('d'), k, mk)
+                    self.assertEqual(rd(self.src), rd(self.p('d')))
 
 
 if __name__ == '__main__':
